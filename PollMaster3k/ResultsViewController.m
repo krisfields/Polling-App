@@ -68,19 +68,40 @@
 }
 
 -(NSUInteger)numberOfRecordsForPlot:(CPTPlot *)plot {
-    return 0;
+    return [self.questionWithAnswers count];
 }
 
 -(NSNumber *)numberForPlot:(CPTPlot *)plot field:(NSUInteger)fieldEnum recordIndex:(NSUInteger)index {
-    return 0;
+    if (CPTPieChartFieldSliceWidth == fieldEnum) {
+        return [NSNumber numberWithInt:[[[self.questionWithAnswers objectAtIndex:index] objectForKey:@"tally"]intValue]];
+    }
+    return [NSDecimalNumber zero];
 }
 
 -(CPTLayer *)dataLabelForPlot:(CPTPlot *)plot recordIndex:(NSUInteger)index {
-    return nil;
+    static CPTMutableTextStyle *labelText = nil;
+    if (!labelText) {
+        labelText= [[CPTMutableTextStyle alloc] init];
+        labelText.color = [CPTColor grayColor];
+    }
+    
+    int totalVotes = 0;
+    for (PFObject *vote in self.questionWithAnswers) {
+        totalVotes += [[vote objectForKey:@"tally"]intValue];
+    }
+    
+    int votes = [[[self.questionWithAnswers objectAtIndex:index]objectForKey:@"tally"]intValue];
+    float percent = ((float)votes/(float)totalVotes)*100;
+    NSString *labelValue = [NSString stringWithFormat:@"%d Votes\n(%0.2f %%)", votes, percent];
+    
+    return [[CPTTextLayer alloc] initWithText:labelValue style:labelText];
 }
 
 -(NSString *)legendTitleForPieChart:(CPTPieChart *)pieChart recordIndex:(NSUInteger)index {
-    return @"";
+    if ([self.questionWithAnswers count] == 0) {
+        return @"N/A";
+    }
+    return [[self.questionWithAnswers objectAtIndex:index] objectForKey:@"answer"];
 }
 
 -(void)initPlot {
@@ -91,15 +112,72 @@
 }
 
 -(void)configureHost {
+    CGRect parentRect = self.view.bounds;
+    self.hostView = [[CPTGraphHostingView alloc] initWithFrame:parentRect];
+    self.hostView.allowPinchScaling = NO;
+    [self.view addSubview:self.hostView];
 }
 
 -(void)configureGraph {
+    CPTGraph *graph = [[CPTXYGraph alloc] initWithFrame:self.hostView.bounds];
+    self.hostView.hostedGraph = graph;
+    graph.paddingLeft = 0.0f;
+    graph.paddingTop = 0.0f;
+    graph.paddingRight = 0.0f;
+    graph.paddingBottom = 0.0f;
+    graph.axisSet = nil;
+    
+    CPTMutableTextStyle *textStyle = [CPTMutableTextStyle textStyle];
+    textStyle.color = [CPTColor grayColor];
+    textStyle.fontName = @"Helvetica-Bold";
+    textStyle.fontSize = 16.0f;
+
+    NSString *title = self.question;
+    graph.title = title;
+    graph.titleTextStyle = textStyle;
+    graph.titlePlotAreaFrameAnchor = CPTRectAnchorTop;
+    graph.titleDisplacement = CGPointMake(0.0f, -12.0f);
+
+    self.selectedTheme = [CPTTheme themeNamed:kCPTDarkGradientTheme];
+    [graph applyTheme:self.selectedTheme];
 }
 
 -(void)configureChart {
+
+    CPTGraph *graph = self.hostView.hostedGraph;
+    // 2 - Create chart
+    CPTPieChart *pieChart = [[CPTPieChart alloc] init];
+    pieChart.dataSource = self;
+    pieChart.delegate = self;
+    pieChart.pieRadius = (self.hostView.bounds.size.height * 0.4) / 2;
+    pieChart.identifier = graph.title;
+    pieChart.startAngle = M_PI_4;
+    pieChart.sliceDirection = CPTPieDirectionClockwise;
+    pieChart.centerAnchor = CGPointMake(.5, .6);
+    // 3 - Create gradient
+    CPTGradient *overlayGradient = [[CPTGradient alloc] init];
+    overlayGradient.gradientType = CPTGradientTypeRadial;
+    overlayGradient = [overlayGradient addColorStop:[[CPTColor blackColor] colorWithAlphaComponent:0.0] atPosition:0.9];
+    overlayGradient = [overlayGradient addColorStop:[[CPTColor blackColor] colorWithAlphaComponent:0.4] atPosition:1.0];
+    pieChart.overlayFill = [CPTFill fillWithGradient:overlayGradient];
+    // 4 - Add chart to graph    
+    [graph addPlot:pieChart];
+
 }
 
 -(void)configureLegend {
+    CPTGraph *graph = self.hostView.hostedGraph;
+    
+    CPTLegend *theLegend = [CPTLegend legendWithGraph:graph];
+    theLegend.numberOfColumns = 1;
+    theLegend.fill = [CPTFill fillWithColor:[CPTColor whiteColor]];
+    theLegend.borderLineStyle = [CPTLineStyle lineStyle];
+    theLegend.cornerRadius = 5.0;
+    
+    graph.legend = theLegend;
+    graph.legendAnchor = CPTRectAnchorBottom;
+    CGFloat legendPadding = -(self.view.bounds.size.width / 8);
+    graph.legendDisplacement = CGPointMake(legendPadding, 0.0);
 }
 
 
