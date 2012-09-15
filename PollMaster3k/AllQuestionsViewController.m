@@ -42,7 +42,14 @@
 //    }
     return self;
 }
-
+- (void)viewWillAppear:(BOOL)animated
+{
+    [self.navigationController setNavigationBarHidden:YES];
+}
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [self.navigationController setNavigationBarHidden:NO];
+}
 - (void)viewDidLoad
 {
     [super viewDidLoad];

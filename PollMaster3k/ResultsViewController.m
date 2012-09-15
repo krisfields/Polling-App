@@ -33,25 +33,25 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.questionLabel.text = self.question;
-    self.questionLabel.minimumFontSize = 1;
-    self.questionLabel.numberOfLines = 1;
-    self.questionLabel.adjustsFontSizeToFitWidth = YES;
+//    self.questionLabel.text = self.question;
+//    self.questionLabel.minimumFontSize = 1;
+//    self.questionLabel.numberOfLines = 1;
+//    self.questionLabel.adjustsFontSizeToFitWidth = YES;
     
     PFQuery *query = [PFQuery queryWithClassName:@"PollResults"];
     [query whereKey:@"question_id" equalTo:self.question_id];
     self.questionWithAnswers = [query findObjects];
     
-    for (int i = 0; i < [self.questionWithAnswers count]; i++) {
-        UILabel *possibleAnswer = [[UILabel alloc]initWithFrame:CGRectMake(20.0, 60.0 + (30.0*i), 280.0, 30.0)];
-        possibleAnswer.minimumFontSize = 1;
-        possibleAnswer.numberOfLines = 1;
-        possibleAnswer.adjustsFontSizeToFitWidth = YES;
-//        UITextView *possibleAnswer = [[UITextView alloc]initWithFrame:CGRectMake(20.0, 60.0 + (30.0*i), 280.0, 30.0)];
-        possibleAnswer.text = [[self.questionWithAnswers objectAtIndex:i] objectForKey:@"answer"];
-        possibleAnswer.text = [possibleAnswer.text stringByAppendingFormat:@": %@",[[self.questionWithAnswers objectAtIndex:i] objectForKey:@"tally"]];
-        [self.view addSubview:possibleAnswer];
-    }
+//    for (int i = 0; i < [self.questionWithAnswers count]; i++) {
+//        UILabel *possibleAnswer = [[UILabel alloc]initWithFrame:CGRectMake(20.0, 60.0 + (30.0*i), 280.0, 30.0)];
+//        possibleAnswer.minimumFontSize = 1;
+//        possibleAnswer.numberOfLines = 1;
+//        possibleAnswer.adjustsFontSizeToFitWidth = YES;
+////        UITextView *possibleAnswer = [[UITextView alloc]initWithFrame:CGRectMake(20.0, 60.0 + (30.0*i), 280.0, 30.0)];
+//        possibleAnswer.text = [[self.questionWithAnswers objectAtIndex:i] objectForKey:@"answer"];
+//        possibleAnswer.text = [possibleAnswer.text stringByAppendingFormat:@": %@",[[self.questionWithAnswers objectAtIndex:i] objectForKey:@"tally"]];
+//        [self.view addSubview:possibleAnswer];
+//    }
 }
 
 - (void)viewDidUnload
@@ -130,16 +130,17 @@
     CPTMutableTextStyle *textStyle = [CPTMutableTextStyle textStyle];
     textStyle.color = [CPTColor grayColor];
     textStyle.fontName = @"Helvetica-Bold";
-    textStyle.fontSize = 16.0f;
+    textStyle.fontSize = 22.0f;
 
     NSString *title = self.question;
     graph.title = title;
     graph.titleTextStyle = textStyle;
     graph.titlePlotAreaFrameAnchor = CPTRectAnchorTop;
-    graph.titleDisplacement = CGPointMake(0.0f, -12.0f);
+    graph.titleDisplacement = CGPointMake(0.0f, -15.0f);
 
     self.selectedTheme = [CPTTheme themeNamed:kCPTDarkGradientTheme];
     [graph applyTheme:self.selectedTheme];
+    graph.plotAreaFrame.borderLineStyle = nil;  
 }
 
 -(void)configureChart {
@@ -149,7 +150,7 @@
     CPTPieChart *pieChart = [[CPTPieChart alloc] init];
     pieChart.dataSource = self;
     pieChart.delegate = self;
-    pieChart.pieRadius = (self.hostView.bounds.size.height * 0.4) / 2;
+    pieChart.pieRadius = (self.hostView.bounds.size.height * 0.42) / 2;
     pieChart.identifier = graph.title;
     pieChart.startAngle = M_PI_4;
     pieChart.sliceDirection = CPTPieDirectionClockwise;
@@ -177,7 +178,7 @@
     graph.legend = theLegend;
     graph.legendAnchor = CPTRectAnchorBottom;
     CGFloat legendPadding = -(self.view.bounds.size.width / 8);
-    graph.legendDisplacement = CGPointMake(legendPadding, 0.0);
+    graph.legendDisplacement = CGPointMake(0.0, 2.0);
 }
 
 

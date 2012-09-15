@@ -34,6 +34,7 @@
     [navigationController1.tabBarItem setImage:[UIImage imageNamed:@"117-todo.png"]];
      UINavigationController *navigationController2 = [[UINavigationController alloc]initWithRootViewController:allQuestionsViewController2];
     navigationController2.title = @"Results";
+//    navigationController2.navigationBar.hidden = YES;
     [navigationController2.tabBarItem setImage:[UIImage imageNamed:@"122-stats.png"]];
     self.tabBarController = [[UITabBarController alloc] init];
     self.tabBarController.viewControllers = @[createQuestionViewController, navigationController1, navigationController2];
